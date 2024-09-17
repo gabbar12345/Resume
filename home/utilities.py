@@ -18,7 +18,6 @@ from projectResume import settings
 
 def get_response(user_prompt,system_prompt=sy):
     response = openai.chat.completions.create(
-    # model="gpt-4", 
     model="gpt-4o",                    
     messages=[{"role": "system", "content": system_prompt,},
               {"role": "user", "content": user_prompt}],
