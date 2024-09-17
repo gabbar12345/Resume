@@ -1,0 +1,8 @@
+django
+djangorestframework
+openai
+openpyxl
+fpdf
+google-cloud-secret-manager
+python-docx
+boto3

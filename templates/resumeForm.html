@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    .popup-message {
+        position: fixed;
+        top: 5%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1000;
+        display: none; /* Initially hidden */
+    }
+</style>
+</head>
+<body class="bg-light">
+  <div class="container">
+      <div class="py-5 text-center">
+          <h2>Input Form</h2>
+      </div>
+
+      <div class="row">
+          <div class="col-md-8 offset-md-2">
+            {% comment %} {% if message %}
+            <div id="popup-message" class="alert alert-success popup-message" role="alert">
+                {{ message }}
+            </div>
+            {% endif %} {% endcomment %}
+            <div id="messages">
+              {% if message %}
+              <div id="popup-message" class="alert alert-success" role="alert">
+                  {{ message }}
+              </div>
+              {% endif %}
+          </div>
+              <form id="generate-form" action="{% url 'Resume2' %}" method="POST" class="shadow p-4 bg-white rounded">
+                  {% csrf_token %}
+                  <div class="form-group">
+                      <label for="jobRole">Enter Job Role:</label>
+                      <input type="text" class="form-control" id="jobRole" name="jobRole" required>
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block">Generate</button>
+                  <a href="{% url 'Preview' %}" target="_blank" id="preview-link" class="btn btn-success btn-block" style="display: none; margin-top: 10px;">Preview PDF</a>
+              </form>
+              
+        </div> 
+          </div>
+      </div>
+  </div>
+  <script>
+    $(document).ready(function() {
+        // Initially hide the preview link if there's no message
+        if (!$('#popup-message').length) {
+            $('#preview-link').hide();
+        } else {
+            $('#preview-link').show();
+            // Hide the message after 5 seconds
+            setTimeout(function() {
+                $('#popup-message').fadeOut();
+            }, 5000);
+        }
+  
+        $('#generate-form').on('submit', function(event) {
+            event.preventDefault(); // Prevent the form from submitting in the traditional way.
+            
+            var formData = $(this).serialize(); // Serialize the form data.
+  
+            $.ajax({
+                url: $(this).attr('action'), // Get the action attribute from the form.
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    // Replace the entire body with the new response
+                    $('body').html(response);
+  
+                    // Show the preview link on success.
+                    $('#preview-link').show();
+                },
+                error: function() {
+                    alert('Error generating PDF. Please try again.');
+                }
+            });
+        });
+    });
+  </script>
+</body>
+</html>
