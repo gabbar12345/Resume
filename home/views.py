@@ -15,6 +15,7 @@ from rest_framework.permissions import AllowAny
 import base64
 import tempfile
 from django.http import FileResponse, Http404
+import sqlite3
 # Create your views here.
 def index(request):
     return render(request,'index.html')
@@ -82,7 +83,14 @@ class Home(APIView):
         except Exception as err:
             logging.error(f"Exception occurred ->{err}")
             return HttpResponse(f"Error -> {err}", status=500)
-              
+
+def check_sqlite(request):
+       try:
+           sqlite_version = sqlite3.sqlite_version
+           return JsonResponse({'sqlite_version': sqlite_version})
+       except Exception as e:
+           return JsonResponse({'error': str(e)})
+
 class Resume2(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
