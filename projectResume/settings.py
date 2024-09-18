@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-kr_1neqmtxu1x)p83usp7k5@wdxi(p!%d-n+2u*yh7r*mvmd8p
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['http://resume-environment.eba-4jgqcg42.us-west-2.elasticbeanstalk.com/']
+ALLOWED_HOSTS = ['resume-environment.eba-4jgqcg42.us-west-2.elasticbeanstalk.com']
 
 
 # Application definition
