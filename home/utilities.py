@@ -15,7 +15,7 @@ from projectResume import settings
 
 
 # openai.api_key =settings.API_KEY
-
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 def get_response(user_prompt,system_prompt=sy):
     response = openai.chat.completions.create(
     model="gpt-4o",                    
