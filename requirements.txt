@@ -6,3 +6,6 @@ fpdf
 google-cloud-secret-manager
 python-docx
 boto3
+gunicorn
+psycopg2-binary
+django-storages
