@@ -43,12 +43,12 @@ def formatedResponse(prompt):
     return changeBody
 
 class PersonalDetails:
-    def __init__(self, name, email, phone, linkedin, photo_path):
+    def __init__(self, name, email, phone, linkedin):
         self.name = name
         self.email = email
         self.phone = phone
         self.linkedin = linkedin
-        self.photo_path = photo_path
+        # self.photo_path = photo_path
 
 class Chapter:
     def __init__(self, title, subtitle, body):
@@ -95,7 +95,7 @@ class ResumePDF(FPDF):
         self.set_font('Arial', 'I', 12)
         self.set_text_color(100, 100, 100)  # Grey color for subtext
         self.cell(150, 7, "Software Engineer | Full-Stack Developer", 0, 1, 'L')
-        self.image(self.personal_details.photo_path, 170, 5, 30, 30)
+        # self.image(self.personal_details.photo_path, 170, 5, 30, 30)
         self.ln(0)
         self.set_font('Arial', '', 10)
         self.set_text_color(0, 0, 0)  # Reset text color to black
@@ -189,7 +189,7 @@ def get_sample_data():
         email="john.doe@example.com",
         phone="+1 (123) 456-7890",
         linkedin="www.linkedin.com/in/johndoe",
-        photo_path=image_path
+        # photo_path=image_path
     )
 
     academic_details = [
