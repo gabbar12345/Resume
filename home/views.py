@@ -9,7 +9,7 @@ import os
 from home.prompts import *
 from home.utilities import ResumePDF, create_resume, formatedResponse, generate_resume2, get_home_directory, get_response, get_sample_data, save_resume
 from home.constants import pdf_path
-from home.models import Submit
+# from home.models import Submit
 from django.contrib import messages
 from rest_framework.permissions import AllowAny
 import base64
@@ -20,13 +20,13 @@ import sqlite3
 def index(request):
     return render(request,'index.html')
 
-def submit(request):
-    if request.method=="POST":
-        email=request.POST.get('email')
-        password=request.POST.get('pwd')
-        sub=Submit(email=email,password=password)
-        sub.save()
-        messages.success(request,"Data updated successfully")
+# def submit(request):
+#     if request.method=="POST":
+#         email=request.POST.get('email')
+#         password=request.POST.get('pwd')
+#         sub=Submit(email=email,password=password)
+#         sub.save()
+#         messages.success(request,"Data updated successfully")
 
     return HttpResponse(Submit.objects.all())
     
