@@ -20,15 +20,6 @@ import sqlite3
 def index(request):
     return render(request,'index.html')
 
-# def submit(request):
-#     if request.method=="POST":
-#         email=request.POST.get('email')
-#         password=request.POST.get('pwd')
-#         sub=Submit(email=email,password=password)
-#         sub.save()
-#         messages.success(request,"Data updated successfully")
-
-    return HttpResponse(Submit.objects.all())
     
 def form_view(request):
     return render(request, 'resumeForm.html')
@@ -84,12 +75,6 @@ class Home(APIView):
             logging.error(f"Exception occurred ->{err}")
             return HttpResponse(f"Error -> {err}", status=500)
 
-def check_sqlite(request):
-       try:
-           sqlite_version = sqlite3.sqlite_version
-           return JsonResponse({'sqlite_version': sqlite_version})
-       except Exception as e:
-           return JsonResponse({'error': str(e)})
 
 class Resume2(APIView):
     permission_classes = [AllowAny]
