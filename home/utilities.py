@@ -298,9 +298,66 @@ def save_resume(document, file_name=pdf_path):
 def get_home_directory():
     return os.path.expanduser("~")
 
-def generate_resume2(jobRole):
-    personal_details, academic_details, chapters, professional_summary, skills, positions_of_responsibility, projects, research_papers = get_sample_data()
-            # Chapter Prompt Changes
+def generate_resume2(jobRole, request):
+    # personal_details, academic_details, chapters, professional_summary, skills, positions_of_responsibility, projects, research_papers = get_sample_data()
+
+    personal_details = PersonalDetails(
+        name=request.session.get('first_name') + " " + request.session.get('last_name'),
+        email=request.session.get('email'),
+        phone=request.session.get('phone'),
+        linkedin=request.session.get('linkedin')
+    )
+    print(personal_details.name)
+
+    academic_details = []
+    for detail in request.session.get('education', []):
+        academic_details.append(AcademicDetail(
+            year=detail.get('college_end_date'),
+            degree=detail.get('degree'),
+            institute_university=detail.get('college_name'),
+            cgpa_percentage=detail.get('cgpa')
+        ))
+    
+    chapters = []
+    for chapter in request.session.get('experiences', []):
+        chapters.append(Chapter(
+            title=chapter.get('job_title'),
+            subtitle=chapter.get('company_name'),
+            body={'description': chapter.get('job_description'),
+                  'bullet_points': chapter.get('job_details').split(',') if chapter.get('job_details') else []}  # Split string into list
+        ))  
+    
+
+    professional_summary=request.session.get('summary')
+    skills=request.session.get('skills_languages').split(',')
+    
+    projects = []
+    for project in request.session.get('projects', []):
+        projects.append(Project(
+            title=project.get('project_title'),
+            description=project.get('project_description')
+        ))
+
+
+    # print(projects)
+    for project in projects:
+        print(project.title)    
+        print(project.description)
+
+    research_papers = []
+    for paper in request.session.get('research_papers', []):
+        research_papers.append(ResearchPaper(
+            title=paper.get('research_title'),
+            authors=paper.get('research_authors'),
+            publication=paper.get('research_publication')
+        ))   
+    print(research_papers)
+
+    positions_of_responsibility = []
+    for position in request.session.get('positions_of_responsibility', []):
+        positions_of_responsibility.append(position)
+        
+    # Chapter Prompt Changes
     chapter_prompt=resumePrompt.format(preData='chapters',data=chapters[0].body,job_role=jobRole)
     response=formatedResponse(chapter_prompt)
     chapters[0].body=response

@@ -25,6 +25,6 @@ urlpatterns = [
     path('resume2/',Resume2.as_view(),name='Resume2'),
     path('preview/',Preview.as_view(),name='Preview'),
     path('',views.index,name="signup"),
-
+    path('submit_resume/',views.submit_resume,name="submit_resume")
 
 ]
