@@ -24,7 +24,7 @@
 <body>
 
     <div class="container">
-        <h2 class="text-center mb-4">Create Your Resume</h2>
+        <h2 class="text-center mb-4" style="color:green;">Create Your Resume</h2>
 
         <!-- Form Starts Here -->
         <form action="/submit_resume/" method="post">
@@ -245,12 +245,12 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="project_date_from_${projectCount}" class="form-label">Start</label>
-                            <input type="date" class="form-control" id="project_date_from_${projectCount}" name="project_date_from_${projectCount}">
+                            <label for="project_start_date_${projectCount}" class="form-label">Start</label>
+                            <input type="date" class="form-control" id="project_start_date_${projectCount}" name="project_start_date_${projectCount}">
                         </div>
                         <div class="col-md-6">
-                            <label for="project_date_to_${projectCount}" class="form-label">End</label>
-                            <input type="date" class="form-control" id="project_date_to_${projectCount}" name="project_date_to_${projectCount}">
+                            <label for="project_end_date_${projectCount}" class="form-label">End</label>
+                            <input type="date" class="form-control" id="project_end_date_${projectCount}" name="project_end_date_${projectCount}">
                         </div>
                     </div>
                     <div class="mb-3">
@@ -319,12 +319,12 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label for="college_date_from_${educationCount}" class="form-label">College Start Date ${educationCount}</label>
-                            <input type="date" class="form-control" id="college_date_from_${educationCount}" name="college_date_from_${educationCount}">
+                            <label for="college_start_date_${educationCount}" class="form-label">College Start Date ${educationCount}</label>
+                            <input type="date" class="form-control" id="college_start_date_${educationCount}" name="college_start_date_${educationCount}">
                         </div>
                         <div class="col-md-6">  
-                            <label for="college_date_to_${educationCount}" class="form-label">College End Date ${educationCount}</label>
-                            <input type="date" class="form-control" id="college_date_to_${educationCount}" name="college_date_to_${educationCount}">
+                            <label for="college_end_date_${educationCount}" class="form-label">College End Date ${educationCount}</label>
+                            <input type="date" class="form-control" id="college_end_date_${educationCount}" name="college_end_date_${educationCount}">
                         </div>
                     </div>
                 </div>`;
