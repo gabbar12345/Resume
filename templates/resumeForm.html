@@ -9,6 +9,23 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <style>
+    .overlay {
+        display: none; /* Hidden by default */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7); /* Background with transparency */
+        z-index: 1000;
+      }
+  
+    .loading-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    }
     .popup-message {
         position: fixed;
         top: 5%;
@@ -16,6 +33,16 @@
         transform: translate(-50%, -50%);
         z-index: 1000;
         display: none; /* Initially hidden */
+    }
+    .note-section {
+        background-color: #f9f9d4; /* Light yellow background color */
+        border-left: 6px solid #ffd700; /* Golden left border to highlight the note */
+        padding: 10px; /* Padding inside the note area */
+        margin: 15px 0; /* Margin to separate the note from other content */
+        font-family: Arial, sans-serif; /* Font for the note text */
+        font-size: 14px; /* Font size for readability */
+        color: #6c757d; /* Slightly gray text color */
+        border-radius: 4px;  /* Rounding the corners slightly */
     }
 </style>
 </head>
@@ -48,22 +75,29 @@
           </div>
       </div>
   </div>
+  <div class="note-section">
+    <strong>Note:</strong> If unsatisfied with the result kindly Regenerate the resume. Thanks for using
+  </div>
+  <div class="overlay">
+    <div class="loading-spinner">
+      <div class="spinner-border text-light" role="status">
+        <span class="sr-only">Loading...</span>
+      </div>
+    </div>
+  </div>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script>
     $(document).ready(function() {
         // Initially hide the preview link if there's no message
-        if (!$('#popup-message').length) {
-            $('#preview-link').hide();
-        } else {
-            $('#preview-link').show();
-            // Hide the message after 5 seconds
-            setTimeout(function() {
-                $('#popup-message').fadeOut();
-            }, 5000);
-        }
+        
   
         $('#generate-form').on('submit', function(event) {
             event.preventDefault(); // Prevent the form from submitting in the traditional way.
-            
+            // Show the overlay
+            $('.overlay').show();
+
+            // Optionally, add a blur effect to the content
+            $('.content-wrapper').css('filter', 'blur(5px)');
             var formData = $(this).serialize(); // Serialize the form data.
   
             $.ajax({
@@ -73,16 +107,29 @@
                 success: function(response) {
                     // Replace the entire body with the new response
                     $('body').html(response);
-  
+                    $('.overlay').hide();
+                    $('.content-wrapper').css('filter', 'none');
                     // Show the preview link on success.
                     $('#preview-link').show();
+                    
                 },
                 error: function() {
                     alert('Error generating PDF. Please try again.');
                 }
             });
         });
+
+        if (!$('#popup-message').length) {
+            $('#preview-link').hide();
+        } else {
+            $('#preview-link').show();
+            // Hide the message after 5 seconds
+            setTimeout(function() {
+                $('#popup-message').fadeOut();
+            }, 5000);
+        }
     });
+    
   </script>
 </body>
 </html>
