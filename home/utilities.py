@@ -9,7 +9,7 @@ import os
 from home.prompts import sy
 from fpdf import FPDF
 from home.prompts import *
-
+from datetime import datetime
 # from home.gcp_secrets import access_secret_version
 from projectResume import settings
 
@@ -51,22 +51,27 @@ class PersonalDetails:
         # self.photo_path = photo_path
 
 class Chapter:
-    def __init__(self, title, subtitle, body):
+    def __init__(self, title, subtitle,year,styear, body):
         self.title = title
         self.subtitle = subtitle
+        self.year=year
+        self.styear=styear
         self.body = body
 
 class AcademicDetail:
-    def __init__(self, year, degree, institute_university, cgpa_percentage):
+    def __init__(self, year, degree, institute_university, cgpa_percentage,styear):
         self.year = year
+        self.styear = styear
         self.degree = degree
         self.institute_university = institute_university
         self.cgpa_percentage = cgpa_percentage
 
 class Project:
-    def __init__(self, title, description):
+    def __init__(self, title, description,year,styear):
         self.title = title
         self.description = description
+        self.year=year
+        self.styear=styear
 
 class ResearchPaper:
     def __init__(self, title, authors, publication):
@@ -75,7 +80,7 @@ class ResearchPaper:
         self.publication = publication
 
 class ResumePDF(FPDF):
-    def __init__(self, personal_details, chapters, academic_details, professional_summary, skills, positions_of_responsibility, projects, research_papers):
+    def __init__(self, personal_details, chapters, academic_details, professional_summary, skills, positions_of_responsibility, projects, research_papers,jobRole):
         super().__init__()
         self.personal_details = personal_details
         self.academic_details = academic_details
@@ -85,28 +90,32 @@ class ResumePDF(FPDF):
         self.positions_of_responsibility = positions_of_responsibility
         self.projects = projects
         self.research_papers = research_papers
+        self.jobRole = jobRole
+        self.header_added = False
 
     def header(self):
-        self.set_fill_color(240, 240, 240)  # Lighter grey background
-        self.rect(0, 0, 210, 48, 'F')  # Grey rectangle for header
-        self.set_font('Arial', 'B', 24)
-        self.set_text_color(0, 0, 100)  # Dark blue color for name
-        self.cell(150, 15, self.personal_details.name, 0, 1, 'L')
-        self.set_font('Arial', 'I', 12)
-        self.set_text_color(100, 100, 100)  # Grey color for subtext
-        self.cell(150, 7, "Software Engineer | Full-Stack Developer", 0, 1, 'L')
-        # self.image(self.personal_details.photo_path, 170, 5, 30, 30)
-        self.ln(0)
-        self.set_font('Arial', '', 10)
-        self.set_text_color(0, 0, 0)  # Reset text color to black
-        self.cell(150, 5, self.personal_details.email, 0, 1, 'L')
-        self.cell(150, 5, self.personal_details.phone, 0, 1, 'L')
-        self.cell(150, 5, self.personal_details.linkedin, 0, 1, 'L', link=self.personal_details.linkedin)
-        self.ln(0)
-        # Add red horizontal line at the bottom of the grey background
-        self.set_draw_color(255, 0, 0)  # Set line color to red
-        self.line(0, 49, 210, 49)  # Draw line at y=48 (bottom of grey background)
-        self.set_draw_color(0, 0, 0)  # Reset draw color to black
+        if not self.header_added:
+            self.set_fill_color(240, 240, 240)  # Lighter grey background
+            self.rect(0, 0, 210, 48, 'F')  # Grey rectangle for header
+            self.set_font('Arial', 'B', 24)
+            self.set_text_color(0, 0, 100)  # Dark blue color for name
+            self.cell(150, 15, self.personal_details.name, 0, 1, 'L')
+            self.set_font('Arial', 'I', 12)
+            self.set_text_color(100, 100, 100)  # Grey color for subtext
+            self.cell(150, 7, self.jobRole, 0, 1, 'L')
+            # self.image(self.personal_details.photo_path, 170, 5, 30, 30)
+            self.ln(0)
+            self.set_font('Arial', '', 10)
+            self.set_text_color(0, 0, 0)  # Reset text color to black
+            self.cell(150, 5, self.personal_details.email, 0, 1, 'L')
+            self.cell(150, 5, self.personal_details.phone, 0, 1, 'L')
+            self.cell(150, 5, self.personal_details.linkedin, 0, 1, 'L', link=self.personal_details.linkedin)
+            self.ln(0)
+            # Add red horizontal line at the bottom of the grey background
+            self.set_draw_color(255, 0, 0)  # Set line color to red
+            self.line(0, 49, 210, 49)  # Draw line at y=48 (bottom of grey background)
+            self.set_draw_color(0, 0, 0)  # Reset draw color to black
+            self.header_added = True
 
     def footer(self):
         self.set_y(-15)
@@ -118,15 +127,18 @@ class ResumePDF(FPDF):
         self.cell(0, 10, title, 'B', 1, 'L')
         self.ln(1)
 
-    def add_chapter(self, chapter):
-        self.set_font('Arial', 'B', 11)
-        self.cell(130, 6, chapter.title, 0, 0, 'L')
-        self.cell(60, 6, chapter.subtitle, 0, 1, 'R')
-        self.set_font('Arial', '', 10)
-        self.multi_cell(0, 5, chapter.body['description'])
-        for point in chapter.body['bullet_points']:
-            self.cell(5)
-            self.cell(0, 5, chr(149) + ' ' + point, 0, 1)
+    def add_chapter(self):
+        self.add_section_title('EXPERIENCE')
+        for chapter in self.chapters:
+            self.set_font('Arial', 'B', 11)
+            self.cell(130, 6, chapter.title, 0, 0, 'L')
+            self.set_font('Arial', 'I', 10)
+            self.cell(60, 6, chapter.subtitle + '('+ chapter.styear + " - " + chapter.year + ")", 0, 1, 'R')
+            self.set_font('Arial', '', 10)
+            self.multi_cell(0, 5, chapter.body['description'])
+            for point in chapter.body['bullet_points']:
+                self.cell(5)
+                self.cell(0, 5, chr(149) + ' ' + point, 0, 1)
         self.ln(2)
 
     def add_academic_details(self):
@@ -134,10 +146,11 @@ class ResumePDF(FPDF):
         for detail in self.academic_details:
             self.set_font('Arial', 'B', 10)
             self.cell(130, 6, detail.degree, 0, 0)
-            self.cell(60, 6, detail.year, 0, 1, 'R')
+            self.set_font('Arial', 'I', 10)
+            self.cell(60, 6, detail.styear+" - "+detail.year, 0, 1, 'R')
             self.set_font('Arial', '', 10)
             self.cell(130, 5, detail.institute_university, 0, 0)
-            self.cell(60, 5, detail.cgpa_percentage, 0, 1, 'R')
+            self.cell(60, 5, detail.cgpa_percentage + " CGPA", 0, 1, 'R')
         self.ln(2)
 
     def add_professional_summary(self):
@@ -168,10 +181,12 @@ class ResumePDF(FPDF):
         self.add_section_title('PROJECTS')
         for project in self.projects:
             self.set_font('Arial', 'B', 10)
-            self.cell(0, 6, project.title, 0, 1)
+            self.cell(130, 6, project.title, 0, 0)
+            self.set_font('Arial', 'I', 10)
+            self.cell(60, 6, project.styear + " - " + project.year, 0, 1, 'R')
             self.set_font('Arial', '', 10)
             self.multi_cell(0, 5, project.description)
-            self.ln(1)
+        self.ln(2)
 
     def add_research_papers(self):
         self.add_section_title('RESEARCH PAPERS')
@@ -298,9 +313,74 @@ def save_resume(document, file_name=pdf_path):
 def get_home_directory():
     return os.path.expanduser("~")
 
-def generate_resume2(jobRole):
-    personal_details, academic_details, chapters, professional_summary, skills, positions_of_responsibility, projects, research_papers = get_sample_data()
-            # Chapter Prompt Changes
+def generate_resume2(jobRole, request):
+    # personal_details, academic_details, chapters, professional_summary, skills, positions_of_responsibility, projects, research_papers = get_sample_data()
+
+    personal_details = PersonalDetails(
+        name=request.session.get('first_name') + " " + request.session.get('last_name'),
+        email=request.session.get('email'),
+        phone=request.session.get('phone'),
+        linkedin=request.session.get('linkedin')
+    )
+    print(personal_details.name)
+
+    academic_details = []
+    for detail in request.session.get('education', []):
+        academic_details.append(AcademicDetail(
+            year=(datetime.strptime(detail.get('college_end_date'),"%Y-%m-%d")).strftime("%b %Y"),
+            styear=(datetime.strptime(detail.get('college_start_date'),"%Y-%m-%d")).strftime("%b %Y"),
+            # (datetime.strptime(date_str, "%Y-%m-%d")).strftime("%b %Y").upper()
+            # styear=detail.get('college_start_date'),
+            degree=detail.get('degree'),
+            institute_university=detail.get('college_name'),
+            cgpa_percentage=detail.get('cgpa')
+        ))
+    
+    chapters = []
+    for chapter in request.session.get('experiences', []):
+        chapters.append(Chapter(
+            title=chapter.get('job_title'),
+            subtitle=chapter.get('company_name'),
+            year=(datetime.strptime(chapter.get('employment_end_date'),"%Y-%m-%d")).strftime("%b %Y"),
+            styear=(datetime.strptime(chapter.get('employment_start_date'),"%Y-%m-%d")).strftime("%b %Y"),
+            # year=chapter.get('employment_end_date'),
+            # styear=chapter.get('employment_start_date'),
+            body={'description': chapter.get('job_description'),
+                  'bullet_points': chapter.get('job_details').split(',') if chapter.get('job_details') else []}  # Split string into list
+        ))  
+    
+
+    professional_summary=request.session.get('summary')
+    skills=request.session.get('skills_languages').split(',')
+    
+    projects = []
+    for project in request.session.get('projects', []):
+        projects.append(Project(
+            title=project.get('project_title'),
+            year=(datetime.strptime(project.get('project_end_date'),"%Y-%m-%d")).strftime("%b %Y"),
+            styear=(datetime.strptime(project.get('project_start_date'),"%Y-%m-%d")).strftime("%b %Y"),
+            # year=project.get('project_start_date'),
+            # styear=project.get('project_end_date'),
+            description=project.get('project_description')
+        ))
+
+
+    research_papers = []
+    for paper in request.session.get('research_papers', []):
+        research_papers.append(ResearchPaper(
+            title=paper.get('research_title'),
+            authors=paper.get('research_authors'),
+            publication=paper.get('research_publication')
+        ))   
+    print(research_papers)
+
+    positions_of_responsibility = []
+    for position in request.session.get('positions_of_responsibility', []):
+        positions_of_responsibility.append(position)
+    
+    # personal_details, academic_details, chapters, professional_summary, skills, positions_of_responsibility, projects, research_papers = get_sample_data()
+
+    # Chapter Prompt Changes
     chapter_prompt=resumePrompt.format(preData='chapters',data=chapters[0].body,job_role=jobRole)
     response=formatedResponse(chapter_prompt)
     chapters[0].body=response
@@ -315,8 +395,9 @@ def generate_resume2(jobRole):
         project_response=formatedResponse(prompt)
         projects[i].description=project_response
 
+   
     # Generate PDF
-    pdf = ResumePDF(personal_details, chapters, academic_details, professional_summary, skills, positions_of_responsibility, projects, research_papers)
+    pdf = ResumePDF(personal_details, chapters, academic_details, professional_summary, skills, positions_of_responsibility, projects, research_papers,jobRole)
     pdf.add_page()
 
     # Add light grey background for the entire page
@@ -324,8 +405,9 @@ def generate_resume2(jobRole):
     pdf.rect(0, 48, 210, 297-40, 'F')  # 297 is A4 height, 40 is header height
 
     pdf.add_professional_summary()
-    for chapter in chapters:
-        pdf.add_chapter(chapter)
+    # for chapter in chapters:
+    #     pdf.add_chapter(chapter)
+    pdf.add_chapter()
     pdf.add_academic_details()
     pdf.add_skills()
     pdf.add_position_of_responsibility()
