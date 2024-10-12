@@ -18,7 +18,7 @@ from projectResume import settings
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 def get_response(user_prompt,system_prompt=sy):
     response = openai.chat.completions.create(
-    model="gpt-4o",                    
+    model="gpt-3.5-turbo",                    
     messages=[{"role": "system", "content": system_prompt,},
               {"role": "user", "content": user_prompt}],
     temperature=1,
@@ -348,7 +348,7 @@ def generate_resume2(jobRole, request):
             body={'description': chapter.get('job_description'),
                   'bullet_points': chapter.get('job_details').split(',') if chapter.get('job_details') else []}  # Split string into list
         ))  
-    
+    print(chapters)
 
     professional_summary=request.session.get('summary')
     skills=request.session.get('skills_languages').split(',')
@@ -372,7 +372,7 @@ def generate_resume2(jobRole, request):
             authors=paper.get('research_authors'),
             publication=paper.get('research_publication')
         ))   
-    print(research_papers)
+    # print(research_papers)
 
     positions_of_responsibility = []
     for position in request.session.get('positions_of_responsibility', []):
@@ -381,9 +381,10 @@ def generate_resume2(jobRole, request):
     # personal_details, academic_details, chapters, professional_summary, skills, positions_of_responsibility, projects, research_papers = get_sample_data()
 
     # Chapter Prompt Changes
-    chapter_prompt=resumePrompt.format(preData='chapters',data=chapters[0].body,job_role=jobRole)
-    response=formatedResponse(chapter_prompt)
-    chapters[0].body=response
+    if chapters:
+        chapter_prompt=resumePrompt.format(preData='chapters',data=chapters[0].body,job_role=jobRole)
+        response=formatedResponse(chapter_prompt)
+        chapters[0].body=response
 
     # Professional Summary Prompt Changes
     Prompt=resumePrompt.format(preData='professionalSummary',data=professional_summary,job_role=jobRole)
@@ -407,11 +408,18 @@ def generate_resume2(jobRole, request):
     pdf.add_professional_summary()
     # for chapter in chapters:
     #     pdf.add_chapter(chapter)
-    pdf.add_chapter()
+    
+    if chapters:
+        for chapter in chapters:
+            pdf.add_chapter(chapter)
+    pdf.add_projects()
     pdf.add_academic_details()
     pdf.add_skills()
-    pdf.add_position_of_responsibility()
-    pdf.add_projects()
-    pdf.add_research_papers()
+    # pdf.add_position_of_responsibility()
+    
+    if research_papers:
+        pdf.add_research_papers()
+    
+
 
     return pdf
