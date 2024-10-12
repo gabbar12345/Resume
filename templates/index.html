@@ -78,11 +78,11 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="project_start_date_1" class="form-label">Start</label>
-                                <input type="date" class="form-control" id="project_start_date_1" name="project_start_date_1"  >
+                                <input type="date" class="form-control" id="project_start_date_1" name="project_start_date_1">
                             </div>
                             <div class="col-md-6">
                                 <label for="project_end_date_1" class="form-label">End</label>
-                                <input type="date" class="form-control" id="project_end_date_1" name="project_end_date_1"  >
+                                <input type="date" class="form-control" id="project_end_date_1" name="project_end_date_1">
                             </div>
                         </div>
                         <div class="mb-3">
@@ -120,7 +120,7 @@
                             </div>
                             <div class="col-md-3">
                                 <label for="employment_end_date_1" class="form-label">Employment End Date 1</label>
-                                <input type="date" class="form-control" id="employment_end_date_1" name="employment_end_date_1">
+                                <input type="date" class="form-control" id="employment_end_date_1" name="employment_end_date_1" max="">
                             </div>
                         </div>
                         <div class="mb-3">
@@ -231,9 +231,15 @@
             </div>
         </form>
     </div>
-
+    
     <!-- JavaScript to Add More Projects, Education, Certifications -->
     <script>
+        function setMaxDateForAllInputs() {
+            const today = new Date().toISOString().split('T')[0];
+            document.querySelectorAll('input[type="date"]').forEach(input => {
+                input.setAttribute('max', today);
+            });
+        }
         // Add more projects
         document.getElementById('addProject').addEventListener('click', function() {
             const projectCount = document.querySelectorAll('.project').length + 1;
@@ -259,6 +265,8 @@
                     </div>
                 </div>`;
             document.getElementById('projects').insertAdjacentHTML('beforeend', projectHTML);
+             // Set max attribute to today for all date input fields
+            setMaxDateForAllInputs();
         });
 
         // Add more Experience
@@ -296,6 +304,7 @@
                     </div>
                 </div>`;    
             document.getElementById('experience').insertAdjacentHTML('beforeend', experienceHTML);
+            setMaxDateForAllInputs();
         });
 
         // Add more Education
@@ -329,6 +338,7 @@
                     </div>
                 </div>`;
             document.getElementById('education').insertAdjacentHTML('beforeend', educationHTML);
+            setMaxDateForAllInputs();
         });
         
         //  Add more research papers
@@ -352,6 +362,9 @@
                     </div>
                 </div>`;
             document.getElementById('researchPapers').insertAdjacentHTML('beforeend', researchPaperHTML);
+        });
+        window.addEventListener('load', function() {
+            setMaxDateForAllInputs();
         });
     </script>
 </body>
