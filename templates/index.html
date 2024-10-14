@@ -231,9 +231,15 @@
             </div>
         </form>
     </div>
-
+    
     <!-- JavaScript to Add More Projects, Education, Certifications -->
     <script>
+        function setMaxDateForAllInputs() {
+            const today = new Date().toISOString().split('T')[0];
+            document.querySelectorAll('input[type="date"]').forEach(input => {
+                input.setAttribute('max', today);
+            });
+        }
     
         function checkProjectFields() {
             const projectTitle = document.getElementById('project_title_1').value;
@@ -326,7 +332,8 @@
                     </div>
                 </div>`;
             document.getElementById('projects').insertAdjacentHTML('beforeend', projectHTML);
-            
+             // Set max attribute to today for all date input fields
+            setMaxDateForAllInputs();
         });
 
         // Add more Experience
@@ -364,6 +371,7 @@
                     </div>
                 </div>`;    
             document.getElementById('experience').insertAdjacentHTML('beforeend', experienceHTML);
+            setMaxDateForAllInputs();
         });
 
         // Add more Education
@@ -397,6 +405,7 @@
                     </div>
                 </div>`;
             document.getElementById('education').insertAdjacentHTML('beforeend', educationHTML);
+            setMaxDateForAllInputs();
         });
         
         //  Add more research papers
@@ -420,6 +429,9 @@
                     </div>
                 </div>`;
             document.getElementById('researchPapers').insertAdjacentHTML('beforeend', researchPaperHTML);
+        });
+        window.addEventListener('load', function() {
+            setMaxDateForAllInputs();
         });
     </script>
 </body>

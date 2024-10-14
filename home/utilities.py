@@ -11,7 +11,8 @@ from fpdf import FPDF
 from home.prompts import *
 from datetime import datetime
 # from home.gcp_secrets import access_secret_version
-from projectResume import settings
+import re
+
 
 
 # openai.api_key =settings.API_KEY
@@ -160,11 +161,17 @@ class ResumePDF(FPDF):
         self.ln(1)
 
     def add_skills(self):
+        # Add a section title
         self.add_section_title('SKILLS')
-        self.set_font('Arial', '', 10)
-        skills_per_line = 4
-        for i in range(0, len(self.skills), skills_per_line):
-            self.cell(0, 5, ' | '.join(self.skills[i:i+skills_per_line]), 0, 1)
+        # Set regular font for skills content
+        self.set_font('Arial', '', 10) 
+        # Join all skills with a separator and add them using MultiCell
+        skills_text = ' | '.join(self.skills)
+        # Width 0 means the cell width will be the remaining space to the right margin
+        # Setting line height to 10 units
+        self.multi_cell(0, 5, skills_text)
+        
+        # Add some vertical space after the skills section
         self.ln(2)
 
     def add_position_of_responsibility(self):
@@ -323,12 +330,14 @@ def generate_resume2(jobRole, request):
         linkedin=request.session.get('linkedin')
     )
     print(personal_details.name)
+    today_date = datetime.now().strftime("%d %b %Y")
 
     academic_details = []
     for detail in request.session.get('education', []):
+        endyear=(datetime.strptime(detail.get('college_end_date'),"%Y-%m-%d")).strftime("%d %b %Y")
         academic_details.append(AcademicDetail(
-            year=(datetime.strptime(detail.get('college_end_date'),"%Y-%m-%d")).strftime("%b %Y"),
-            styear=(datetime.strptime(detail.get('college_start_date'),"%Y-%m-%d")).strftime("%b %Y"),
+            year = "Present" if endyear == today_date else endyear,  
+            styear=(datetime.strptime(detail.get('college_start_date'),"%Y-%m-%d")).strftime("%d %b %Y"),
             # (datetime.strptime(date_str, "%Y-%m-%d")).strftime("%b %Y").upper()
             # styear=detail.get('college_start_date'),
             degree=detail.get('degree'),
@@ -338,11 +347,12 @@ def generate_resume2(jobRole, request):
     
     chapters = []
     for chapter in request.session.get('experiences', []):
+        endyear=(datetime.strptime(chapter.get('employment_end_date'),"%Y-%m-%d")).strftime("%d %b %Y")
         chapters.append(Chapter(
             title=chapter.get('job_title'),
             subtitle=chapter.get('company_name'),
-            year=(datetime.strptime(chapter.get('employment_end_date'),"%Y-%m-%d")).strftime("%b %Y"),
-            styear=(datetime.strptime(chapter.get('employment_start_date'),"%Y-%m-%d")).strftime("%b %Y"),
+            year = "Present" if endyear == today_date else endyear,
+            styear=(datetime.strptime(chapter.get('employment_start_date'),"%Y-%m-%d")).strftime("%d %b %Y"),
             # year=chapter.get('employment_end_date'),
             # styear=chapter.get('employment_start_date'),
             body={'description': chapter.get('job_description'),
@@ -355,10 +365,11 @@ def generate_resume2(jobRole, request):
     
     projects = []
     for project in request.session.get('projects', []):
+        endyear=(datetime.strptime(project.get('project_end_date'),"%Y-%m-%d")).strftime("%d %b %Y")
         projects.append(Project(
             title=project.get('project_title'),
-            year=(datetime.strptime(project.get('project_end_date'),"%Y-%m-%d")).strftime("%b %Y"),
-            styear=(datetime.strptime(project.get('project_start_date'),"%Y-%m-%d")).strftime("%b %Y"),
+            year = "Present" if endyear == today_date else endyear,
+            styear=(datetime.strptime(project.get('project_start_date'),"%Y-%m-%d")).strftime("%d %b %Y"),
             # year=project.get('project_start_date'),
             # styear=project.get('project_end_date'),
             description=project.get('project_description')
