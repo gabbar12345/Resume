@@ -81,7 +81,7 @@ class ResearchPaper:
         self.publication = publication
 
 class ResumePDF(FPDF):
-    def __init__(self, personal_details, chapters, academic_details, professional_summary, skills, positions_of_responsibility, projects, research_papers,jobRole):
+    def __init__(self, personal_details, chapters, academic_details, professional_summary, skills, positions_of_responsibility, projects, research_papers,jobRole,achievement):
         super().__init__()
         self.personal_details = personal_details
         self.academic_details = academic_details
@@ -92,6 +92,7 @@ class ResumePDF(FPDF):
         self.projects = projects
         self.research_papers = research_papers
         self.jobRole = jobRole
+        self.achievement=achievement
         self.header_added = False
 
     def header(self):
@@ -100,17 +101,17 @@ class ResumePDF(FPDF):
             self.rect(0, 0, 210, 48, 'F')  # Grey rectangle for header
             self.set_font('Arial', 'B', 24)
             self.set_text_color(0, 0, 100)  # Dark blue color for name
-            self.cell(150, 15, self.personal_details.name, 0, 1, 'L')
+            self.cell(150, 15, self.personal_details.name.title(), 0, 1, 'L')
             self.set_font('Arial', 'I', 12)
             self.set_text_color(100, 100, 100)  # Grey color for subtext
-            self.cell(150, 7, self.jobRole, 0, 1, 'L')
+            self.cell(150, 7, self.jobRole.title(), 0, 1, 'L')
             # self.image(self.personal_details.photo_path, 170, 5, 30, 30)
             self.ln(0)
             self.set_font('Arial', '', 10)
             self.set_text_color(0, 0, 0)  # Reset text color to black
             self.cell(150, 5, self.personal_details.email, 0, 1, 'L')
-            self.cell(150, 5, self.personal_details.phone, 0, 1, 'L')
             self.cell(150, 5, self.personal_details.linkedin, 0, 1, 'L', link=self.personal_details.linkedin)
+            self.cell(150, 5, self.personal_details.phone, 0, 1, 'L')
             self.ln(0)
             # Add red horizontal line at the bottom of the grey background
             self.set_draw_color(255, 0, 0)  # Set line color to red
@@ -174,6 +175,13 @@ class ResumePDF(FPDF):
         # Add some vertical space after the skills section
         self.ln(2)
 
+    def add_achievements(self):
+        self.add_section_title('ACHIEVEMENT & CERTIFICATIONS')
+        self.set_font('Arial', '', 10)
+        for point in self.achievement:
+            self.cell(0, 5, chr(149) + ' ' + point, 0, 1)
+            self.ln(2)
+
     def add_position_of_responsibility(self):
         self.add_section_title('POSITIONS OF RESPONSIBILITY')
         for position in self.positions_of_responsibility:
@@ -205,54 +213,6 @@ class ResumePDF(FPDF):
             self.cell(0, 5, f"Publication: {paper.publication}", 0, 1)
             self.ln(1)
 
-def get_sample_data():
-    personal_details = PersonalDetails(
-        name="John Doe",
-        email="john.doe@example.com",
-        phone="+1 (123) 456-7890",
-        linkedin="www.linkedin.com/in/johndoe",
-        # photo_path=image_path
-    )
-
-    academic_details = [
-        AcademicDetail("2022", "B.S. in Computer Science", "University of Technology", "GPA: 3.8/4.0"),
-        AcademicDetail("2018", "High School Diploma", "Central High School", "GPA: 4.0/4.0")
-    ]
-
-    chapters = [
-        Chapter('Software Engineer', 'XYZ Corp (2020-Present)', {
-            'description': 'Lead developer for enterprise-level applications.',
-            'bullet_points': [
-                'Implemented microservices architecture, improving system efficiency by 40%',
-                'Mentored junior developers, increasing team productivity by 25%'
-            ]
-        })
-    ]
-
-    professional_summary = "Dedicated software engineer with 3+ years of experience in developing scalable web applications. Proficient in full-stack development with a focus on cloud technologies. Proven track record of delivering high-quality solutions and driving innovation in fast-paced environments."
-
-    skills = ["Python", "JavaScript", "React", "Node.js", "AWS", "Docker", "Git", "SQL", "MongoDB", "RESTful APIs"]
-
-    positions_of_responsibility = [
-        {
-            'company': 'Tech Society',
-            'place': 'University',
-            'position': 'President',
-            'impact': 'Organized 10+ tech workshops, increasing member engagement by 50% and facilitating industry connections for students.'
-        }
-    ]
-
-    projects = [
-        Project("AI-powered Chatbot", "Developed a chatbot using natural language processing techniques to improve customer service efficiency."),
-        Project("E-commerce Platform", "Built a scalable e-commerce platform using React and Node.js, handling 10,000+ daily active users.")
-    ]
-
-    research_papers = [
-        ResearchPaper("Machine Learning in Healthcare", "John Doe, Jane Smith", "International Journal of Medical Informatics"),
-        ResearchPaper("Blockchain for Supply Chain Management", "John Doe, et al.", "IEEE Transactions on Engineering Management")
-    ]
-
-    return personal_details, academic_details, chapters, professional_summary, skills, positions_of_responsibility, projects, research_papers
 
 
 def create_resume(fields):
@@ -321,7 +281,6 @@ def get_home_directory():
     return os.path.expanduser("~")
 
 def generate_resume2(jobRole, request):
-    # personal_details, academic_details, chapters, professional_summary, skills, positions_of_responsibility, projects, research_papers = get_sample_data()
 
     personal_details = PersonalDetails(
         name=request.session.get('first_name') + " " + request.session.get('last_name'),
@@ -362,6 +321,9 @@ def generate_resume2(jobRole, request):
 
     professional_summary=request.session.get('summary')
     skills=request.session.get('skills_languages').split(',')
+
+    achievements=request.session.get('certification_1').split('\r')
+    achievement = [achieve.strip() for achieve in achievements]
     
     projects = []
     for project in request.session.get('projects', []):
@@ -370,8 +332,6 @@ def generate_resume2(jobRole, request):
             title=project.get('project_title'),
             year = "Present" if endyear == today_date else endyear,
             styear=(datetime.strptime(project.get('project_start_date'),"%Y-%m-%d")).strftime("%d %b %Y"),
-            # year=project.get('project_start_date'),
-            # styear=project.get('project_end_date'),
             description=project.get('project_description')
         ))
 
@@ -409,7 +369,7 @@ def generate_resume2(jobRole, request):
 
    
     # Generate PDF
-    pdf = ResumePDF(personal_details, chapters, academic_details, professional_summary, skills, positions_of_responsibility, projects, research_papers,jobRole)
+    pdf = ResumePDF(personal_details, chapters, academic_details, professional_summary, skills, positions_of_responsibility, projects, research_papers,jobRole,achievement)
     pdf.add_page()
 
     # Add light grey background for the entire page
@@ -421,8 +381,7 @@ def generate_resume2(jobRole, request):
     #     pdf.add_chapter(chapter)
     
     if chapters:
-        for chapter in chapters:
-            pdf.add_chapter(chapter)
+        pdf.add_chapter()
     pdf.add_projects()
     pdf.add_academic_details()
     pdf.add_skills()
@@ -430,6 +389,8 @@ def generate_resume2(jobRole, request):
     
     if research_papers:
         pdf.add_research_papers()
+    if achievement[0]!='':
+        pdf.add_achievements()
     
 
 

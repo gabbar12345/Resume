@@ -7,7 +7,7 @@ from django.http import HttpResponse
 import os
 
 from home.prompts import *
-from home.utilities import ResumePDF, create_resume, formatedResponse, generate_resume2, get_home_directory, get_response, get_sample_data, save_resume
+from home.utilities import ResumePDF, create_resume, formatedResponse, generate_resume2, get_home_directory, get_response, save_resume
 from home.constants import pdf_path
 # from home.models import Submit
 from django.contrib import messages
