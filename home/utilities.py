@@ -11,14 +11,15 @@ from fpdf import FPDF
 from home.prompts import *
 from datetime import datetime
 # from home.gcp_secrets import access_secret_version
-from projectResume import settings
+import re
+
 
 
 # openai.api_key =settings.API_KEY
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 def get_response(user_prompt,system_prompt=sy):
     response = openai.chat.completions.create(
-    model="gpt-4o",                    
+    model="gpt-3.5-turbo",                    
     messages=[{"role": "system", "content": system_prompt,},
               {"role": "user", "content": user_prompt}],
     temperature=1,
@@ -80,7 +81,7 @@ class ResearchPaper:
         self.publication = publication
 
 class ResumePDF(FPDF):
-    def __init__(self, personal_details, chapters, academic_details, professional_summary, skills, positions_of_responsibility, projects, research_papers,jobRole):
+    def __init__(self, personal_details, chapters, academic_details, professional_summary, skills, positions_of_responsibility, projects, research_papers,jobRole,achievement):
         super().__init__()
         self.personal_details = personal_details
         self.academic_details = academic_details
@@ -91,6 +92,7 @@ class ResumePDF(FPDF):
         self.projects = projects
         self.research_papers = research_papers
         self.jobRole = jobRole
+        self.achievement=achievement
         self.header_added = False
 
     def header(self):
@@ -99,17 +101,17 @@ class ResumePDF(FPDF):
             self.rect(0, 0, 210, 48, 'F')  # Grey rectangle for header
             self.set_font('Arial', 'B', 24)
             self.set_text_color(0, 0, 100)  # Dark blue color for name
-            self.cell(150, 15, self.personal_details.name, 0, 1, 'L')
+            self.cell(150, 15, self.personal_details.name.title(), 0, 1, 'L')
             self.set_font('Arial', 'I', 12)
             self.set_text_color(100, 100, 100)  # Grey color for subtext
-            self.cell(150, 7, self.jobRole, 0, 1, 'L')
+            self.cell(150, 7, self.jobRole.title(), 0, 1, 'L')
             # self.image(self.personal_details.photo_path, 170, 5, 30, 30)
             self.ln(0)
             self.set_font('Arial', '', 10)
             self.set_text_color(0, 0, 0)  # Reset text color to black
             self.cell(150, 5, self.personal_details.email, 0, 1, 'L')
-            self.cell(150, 5, self.personal_details.phone, 0, 1, 'L')
             self.cell(150, 5, self.personal_details.linkedin, 0, 1, 'L', link=self.personal_details.linkedin)
+            self.cell(150, 5, self.personal_details.phone, 0, 1, 'L')
             self.ln(0)
             # Add red horizontal line at the bottom of the grey background
             self.set_draw_color(255, 0, 0)  # Set line color to red
@@ -160,12 +162,25 @@ class ResumePDF(FPDF):
         self.ln(1)
 
     def add_skills(self):
+        # Add a section title
         self.add_section_title('SKILLS')
-        self.set_font('Arial', '', 10)
-        skills_per_line = 4
-        for i in range(0, len(self.skills), skills_per_line):
-            self.cell(0, 5, ' | '.join(self.skills[i:i+skills_per_line]), 0, 1)
+        # Set regular font for skills content
+        self.set_font('Arial', '', 10) 
+        # Join all skills with a separator and add them using MultiCell
+        skills_text = ' | '.join(self.skills)
+        # Width 0 means the cell width will be the remaining space to the right margin
+        # Setting line height to 10 units
+        self.multi_cell(0, 5, skills_text)
+        
+        # Add some vertical space after the skills section
         self.ln(2)
+
+    def add_achievements(self):
+        self.add_section_title('ACHIEVEMENT & CERTIFICATIONS')
+        self.set_font('Arial', '', 10)
+        for point in self.achievement:
+            self.cell(0, 5, chr(149) + ' ' + point, 0, 1)
+            self.ln(2)
 
     def add_position_of_responsibility(self):
         self.add_section_title('POSITIONS OF RESPONSIBILITY')
@@ -198,54 +213,6 @@ class ResumePDF(FPDF):
             self.cell(0, 5, f"Publication: {paper.publication}", 0, 1)
             self.ln(1)
 
-def get_sample_data():
-    personal_details = PersonalDetails(
-        name="John Doe",
-        email="john.doe@example.com",
-        phone="+1 (123) 456-7890",
-        linkedin="www.linkedin.com/in/johndoe",
-        # photo_path=image_path
-    )
-
-    academic_details = [
-        AcademicDetail("2022", "B.S. in Computer Science", "University of Technology", "GPA: 3.8/4.0"),
-        AcademicDetail("2018", "High School Diploma", "Central High School", "GPA: 4.0/4.0")
-    ]
-
-    chapters = [
-        Chapter('Software Engineer', 'XYZ Corp (2020-Present)', {
-            'description': 'Lead developer for enterprise-level applications.',
-            'bullet_points': [
-                'Implemented microservices architecture, improving system efficiency by 40%',
-                'Mentored junior developers, increasing team productivity by 25%'
-            ]
-        })
-    ]
-
-    professional_summary = "Dedicated software engineer with 3+ years of experience in developing scalable web applications. Proficient in full-stack development with a focus on cloud technologies. Proven track record of delivering high-quality solutions and driving innovation in fast-paced environments."
-
-    skills = ["Python", "JavaScript", "React", "Node.js", "AWS", "Docker", "Git", "SQL", "MongoDB", "RESTful APIs"]
-
-    positions_of_responsibility = [
-        {
-            'company': 'Tech Society',
-            'place': 'University',
-            'position': 'President',
-            'impact': 'Organized 10+ tech workshops, increasing member engagement by 50% and facilitating industry connections for students.'
-        }
-    ]
-
-    projects = [
-        Project("AI-powered Chatbot", "Developed a chatbot using natural language processing techniques to improve customer service efficiency."),
-        Project("E-commerce Platform", "Built a scalable e-commerce platform using React and Node.js, handling 10,000+ daily active users.")
-    ]
-
-    research_papers = [
-        ResearchPaper("Machine Learning in Healthcare", "John Doe, Jane Smith", "International Journal of Medical Informatics"),
-        ResearchPaper("Blockchain for Supply Chain Management", "John Doe, et al.", "IEEE Transactions on Engineering Management")
-    ]
-
-    return personal_details, academic_details, chapters, professional_summary, skills, positions_of_responsibility, projects, research_papers
 
 
 def create_resume(fields):
@@ -314,7 +281,6 @@ def get_home_directory():
     return os.path.expanduser("~")
 
 def generate_resume2(jobRole, request):
-    # personal_details, academic_details, chapters, professional_summary, skills, positions_of_responsibility, projects, research_papers = get_sample_data()
 
     personal_details = PersonalDetails(
         name=request.session.get('first_name') + " " + request.session.get('last_name'),
@@ -323,12 +289,14 @@ def generate_resume2(jobRole, request):
         linkedin=request.session.get('linkedin')
     )
     print(personal_details.name)
+    today_date = datetime.now().strftime("%d %b %Y")
 
     academic_details = []
     for detail in request.session.get('education', []):
+        endyear=(datetime.strptime(detail.get('college_end_date'),"%Y-%m-%d")).strftime("%d %b %Y")
         academic_details.append(AcademicDetail(
-            year=(datetime.strptime(detail.get('college_end_date'),"%Y-%m-%d")).strftime("%b %Y"),
-            styear=(datetime.strptime(detail.get('college_start_date'),"%Y-%m-%d")).strftime("%b %Y"),
+            year = "Present" if endyear == today_date else endyear,  
+            styear=(datetime.strptime(detail.get('college_start_date'),"%Y-%m-%d")).strftime("%d %b %Y"),
             # (datetime.strptime(date_str, "%Y-%m-%d")).strftime("%b %Y").upper()
             # styear=detail.get('college_start_date'),
             degree=detail.get('degree'),
@@ -338,29 +306,32 @@ def generate_resume2(jobRole, request):
     
     chapters = []
     for chapter in request.session.get('experiences', []):
+        endyear=(datetime.strptime(chapter.get('employment_end_date'),"%Y-%m-%d")).strftime("%d %b %Y")
         chapters.append(Chapter(
             title=chapter.get('job_title'),
             subtitle=chapter.get('company_name'),
-            year=(datetime.strptime(chapter.get('employment_end_date'),"%Y-%m-%d")).strftime("%b %Y"),
-            styear=(datetime.strptime(chapter.get('employment_start_date'),"%Y-%m-%d")).strftime("%b %Y"),
+            year = "Present" if endyear == today_date else endyear,
+            styear=(datetime.strptime(chapter.get('employment_start_date'),"%Y-%m-%d")).strftime("%d %b %Y"),
             # year=chapter.get('employment_end_date'),
             # styear=chapter.get('employment_start_date'),
             body={'description': chapter.get('job_description'),
                   'bullet_points': chapter.get('job_details').split(',') if chapter.get('job_details') else []}  # Split string into list
         ))  
-    
+    print(chapters)
 
     professional_summary=request.session.get('summary')
     skills=request.session.get('skills_languages').split(',')
+
+    achievements=request.session.get('certification_1').split('\r')
+    achievement = [achieve.strip() for achieve in achievements]
     
     projects = []
     for project in request.session.get('projects', []):
+        endyear=(datetime.strptime(project.get('project_end_date'),"%Y-%m-%d")).strftime("%d %b %Y")
         projects.append(Project(
             title=project.get('project_title'),
-            year=(datetime.strptime(project.get('project_end_date'),"%Y-%m-%d")).strftime("%b %Y"),
-            styear=(datetime.strptime(project.get('project_start_date'),"%Y-%m-%d")).strftime("%b %Y"),
-            # year=project.get('project_start_date'),
-            # styear=project.get('project_end_date'),
+            year = "Present" if endyear == today_date else endyear,
+            styear=(datetime.strptime(project.get('project_start_date'),"%Y-%m-%d")).strftime("%d %b %Y"),
             description=project.get('project_description')
         ))
 
@@ -372,7 +343,7 @@ def generate_resume2(jobRole, request):
             authors=paper.get('research_authors'),
             publication=paper.get('research_publication')
         ))   
-    print(research_papers)
+    # print(research_papers)
 
     positions_of_responsibility = []
     for position in request.session.get('positions_of_responsibility', []):
@@ -381,9 +352,10 @@ def generate_resume2(jobRole, request):
     # personal_details, academic_details, chapters, professional_summary, skills, positions_of_responsibility, projects, research_papers = get_sample_data()
 
     # Chapter Prompt Changes
-    chapter_prompt=resumePrompt.format(preData='chapters',data=chapters[0].body,job_role=jobRole)
-    response=formatedResponse(chapter_prompt)
-    chapters[0].body=response
+    if chapters:
+        chapter_prompt=resumePrompt.format(preData='chapters',data=chapters[0].body,job_role=jobRole)
+        response=formatedResponse(chapter_prompt)
+        chapters[0].body=response
 
     # Professional Summary Prompt Changes
     Prompt=resumePrompt.format(preData='professionalSummary',data=professional_summary,job_role=jobRole)
@@ -397,7 +369,7 @@ def generate_resume2(jobRole, request):
 
    
     # Generate PDF
-    pdf = ResumePDF(personal_details, chapters, academic_details, professional_summary, skills, positions_of_responsibility, projects, research_papers,jobRole)
+    pdf = ResumePDF(personal_details, chapters, academic_details, professional_summary, skills, positions_of_responsibility, projects, research_papers,jobRole,achievement)
     pdf.add_page()
 
     # Add light grey background for the entire page
@@ -407,11 +379,19 @@ def generate_resume2(jobRole, request):
     pdf.add_professional_summary()
     # for chapter in chapters:
     #     pdf.add_chapter(chapter)
-    pdf.add_chapter()
+    
+    if chapters:
+        pdf.add_chapter()
+    pdf.add_projects()
     pdf.add_academic_details()
     pdf.add_skills()
-    pdf.add_position_of_responsibility()
-    pdf.add_projects()
-    pdf.add_research_papers()
+    # pdf.add_position_of_responsibility()
+    
+    if research_papers:
+        pdf.add_research_papers()
+    if achievement[0]!='':
+        pdf.add_achievements()
+    
+
 
     return pdf

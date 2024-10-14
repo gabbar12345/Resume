@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-kr_1neqmtxu1x)p83usp7k5@wdxi(p!%d-n+2u*yh7r*mvmd8p
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['projectresume.eba-zguas8ea.us-west-2.elasticbeanstalk.com','127.0.0.1']
+ALLOWED_HOSTS = ['projectresume.eba-zguas8ea.us-west-2.elasticbeanstalk.com','127.0.0.1','localhost']
 
 
 # Application definition
