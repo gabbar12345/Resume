@@ -135,7 +135,10 @@ class ResumePDF(FPDF):
             self.set_font('Arial', 'B', 11)
             self.cell(130, 6, chapter.title, 0, 0, 'L')
             self.set_font('Arial', 'I', 10)
-            self.cell(60, 6, chapter.subtitle + '('+ chapter.styear + " - " + chapter.year + ")", 0, 1, 'R')
+            if chapter.styear or chapter.year:
+                self.cell(60, 6, chapter.subtitle + '('+ chapter.styear + " - " + chapter.year + ")", 0, 1, 'R')
+            else:
+                self.cell(60, 6, chapter.subtitle + chapter.styear + chapter.year, 0, 1, 'R')
             self.set_font('Arial', '', 10)
             self.multi_cell(0, 5, chapter.body['description'])
             for point in chapter.body['bullet_points']:
@@ -179,7 +182,7 @@ class ResumePDF(FPDF):
         self.add_section_title('ACHIEVEMENT & CERTIFICATIONS')
         self.set_font('Arial', '', 10)
         for point in self.achievement:
-            self.cell(0, 5, chr(149) + ' ' + point, 0, 1)
+            self.multi_cell(0, 5, chr(149) + ' ' + point, 0, 1)
             self.ln(2)
 
     def add_position_of_responsibility(self):
@@ -306,16 +309,27 @@ def generate_resume2(jobRole, request):
     
     chapters = []
     for chapter in request.session.get('experiences', []):
-        endyear=(datetime.strptime(chapter.get('employment_end_date'),"%Y-%m-%d")).strftime("%d %b %Y")
+        employment_start_date = chapter.get('employment_start_date', '').strip()
+        if employment_start_date:
+            startyear=(datetime.strptime(employment_start_date,"%Y-%m-%d")).strftime("%d %b %Y")
+        else:
+            startyear=''
+        employment_end_date = chapter.get('employment_end_date', '').strip()
+        if employment_end_date:
+            endyear=(datetime.strptime(employment_end_date,"%Y-%m-%d")).strftime("%d %b %Y")
+        else:
+            endyear=''
+        job_det=chapter.get('job_details').split('\r')
+        job_details = [jobdata.strip() for jobdata in job_det]
         chapters.append(Chapter(
             title=chapter.get('job_title'),
             subtitle=chapter.get('company_name'),
             year = "Present" if endyear == today_date else endyear,
-            styear=(datetime.strptime(chapter.get('employment_start_date'),"%Y-%m-%d")).strftime("%d %b %Y"),
+            styear=startyear,
             # year=chapter.get('employment_end_date'),
             # styear=chapter.get('employment_start_date'),
             body={'description': chapter.get('job_description'),
-                  'bullet_points': chapter.get('job_details').split(',') if chapter.get('job_details') else []}  # Split string into list
+                  'bullet_points': job_details if job_details else []}  # Split string into list
         ))  
     print(chapters)
 
@@ -353,14 +367,19 @@ def generate_resume2(jobRole, request):
 
     # Chapter Prompt Changes
     if chapters:
-        chapter_prompt=resumePrompt.format(preData='chapters',data=chapters[0].body,job_role=jobRole)
-        response=formatedResponse(chapter_prompt)
-        chapters[0].body=response
+        for i in range(len(chapters)):
+            chapter_prompt=resumePrompt.format(preData='chapters',data=chapters[i].body,job_role=jobRole)
+            response=formatedResponse(chapter_prompt)
+            chapters[i].body=response
 
     # Professional Summary Prompt Changes
     Prompt=resumePrompt.format(preData='professionalSummary',data=professional_summary,job_role=jobRole)
     summary_response=formatedResponse(Prompt)
     professional_summary=summary_response
+
+    achiement_prompt=grammaticalPrompt.format(preData='Achievements & Certifications',data=achievement)
+    achievement_response=formatedResponse(achiement_prompt)
+    achievement=achievement_response
 
     for i in range(len(projects)):
         prompt=resumePrompt.format(preData='project description',data=projects[i].description,job_role=jobRole)

@@ -24,3 +24,12 @@ Please change this {preData} according to below job description quoted in @@@, p
 {job_role}
 @@@
 """
+
+grammaticalPrompt="""
+in a resume preexisting {preData} contains below data.
+
+{data}
+
+Please correct the grammatical mistakes and more understandable way for the bullet point in {preData}, provide output in the {data} format only without any labelling or formating.
+
+"""
