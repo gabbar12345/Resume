@@ -377,9 +377,10 @@ def generate_resume2(jobRole, request):
     summary_response=formatedResponse(Prompt)
     professional_summary=summary_response
 
-    achiement_prompt=grammaticalPrompt.format(preData='Achievements & Certifications',data=achievement)
-    achievement_response=formatedResponse(achiement_prompt)
-    achievement=achievement_response
+    if achievement[0]!='':
+        achiement_prompt=grammaticalPrompt.format(preData='Achievements & Certifications',data=achievement)
+        achievement_response=formatedResponse(achiement_prompt)
+        achievement=achievement_response
 
     for i in range(len(projects)):
         prompt=resumePrompt.format(preData='project description',data=projects[i].description,job_role=jobRole)
